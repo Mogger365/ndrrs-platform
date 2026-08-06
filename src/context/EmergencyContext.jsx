@@ -44,14 +44,11 @@ export const EmergencyProvider = ({ children }) => {
     ? `http://${window.location.hostname}:3001`
     : (typeof window !== 'undefined' ? window.location.origin : '');
 
-  // Audio synthesize announcement & Emergency Siren
+  // Audio synthesize announcement & Emergency Siren (Spoken Voice Disabled)
   const speakAlert = (text) => {
+    // Spoken voice announcements disabled for silent emergency operation
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 1.0;
-      utterance.pitch = 1.1;
-      window.speechSynthesis.speak(utterance);
     }
   };
 
