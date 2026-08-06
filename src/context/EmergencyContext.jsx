@@ -7,7 +7,7 @@ import { mockResources } from '../mockData/mockResources';
 
 const EmergencyContext = createContext();
 
-// Use Secure WebSocket MQTT Broker for 100% Reliable Cross-Device Sync (<50ms)
+// Secure WebSocket MQTT Broker for 100% Reliable Cross-Device Sync (<50ms)
 const MQTT_BROKER_URL = 'wss://broker.emqx.io:8084/mqtt';
 const MQTT_TOPIC = 'ndrrs_india_emergency_channel_v4_live';
 
@@ -17,6 +17,19 @@ export const EmergencyProvider = ({ children }) => {
   const [theme, setTheme] = useState('dark'); 
   const [adminRole, setAdminRole] = useState('ndrf'); 
   
+  // Create a persistent unique device identity so each phone is tracked as 1 distinct citizen
+  const [deviceIdentity] = useState(() => {
+    let id = localStorage.getItem('ndrrs_device_id');
+    let phone = localStorage.getItem('ndrrs_device_phone');
+    if (!id) {
+      id = `VIC-${Math.floor(1000 + Math.random() * 9000)}`;
+      phone = `+91 9${Math.floor(100000000 + Math.random() * 900000000)}`;
+      localStorage.setItem('ndrrs_device_id', id);
+      localStorage.setItem('ndrrs_device_phone', phone);
+    }
+    return { id, phone };
+  });
+
   // User Telemetry State with Automatic Live GPS
   const [userLocation, setUserLocation] = useState({
     lat: 17.3850,
@@ -96,17 +109,15 @@ export const EmergencyProvider = ({ children }) => {
     }
   }, []);
 
-  // 1. AUTO-RESET ON FRESH APP OPEN (Starts 100% Clean with ZERO cases)
+  // 1. AUTO-RESET ON FRESH APP OPEN (Starts 100% Clean with ZERO cases locally)
+  // FIX: We only clear LOCAL state. We NEVER broadcast a global CLEAR_ALL on load,
+  // because that would wipe out other phones' SOS signals if a new phone opens the app!
   useEffect(() => {
-    const sessionToken = sessionStorage.getItem('ndrrs_session_active_v4');
+    const sessionToken = sessionStorage.getItem('ndrrs_session_active_v5');
     if (!sessionToken) {
-      sessionStorage.setItem('ndrrs_session_active_v4', Date.now().toString());
+      sessionStorage.setItem('ndrrs_session_active_v5', Date.now().toString());
       setVictims([]);
       setAdminIncomingAlert(null);
-      // Publish CLEAR_ALL to MQTT so all other open laptops also clear
-      if (mqttClientRef.current && mqttClientRef.current.connected) {
-        mqttClientRef.current.publish(MQTT_TOPIC, JSON.stringify({ type: 'CLEAR_ALL' }));
-      }
     }
   }, []);
 
@@ -136,15 +147,27 @@ export const EmergencyProvider = ({ children }) => {
             const newVictim = data.payload;
             setVictims(prev => {
               const exists = prev.some(v => v.id === newVictim.id);
-              if (!exists && newVictim.level === 'red') {
+              // Only trigger siren if it's a completely new Red SOS, or if they upgraded from Green to Red
+              const wasRed = exists && prev.find(v => v.id === newVictim.id)?.level === 'red';
+              
+              if (newVictim.level === 'red' && !wasRed) {
                 setAdminIncomingAlert(newVictim);
                 playSirenSound();
               }
               return [newVictim, ...prev.filter(v => v.id !== newVictim.id)];
             });
           } else if (data.type === 'MARK_SAFE') {
-            const { victimId } = data.payload;
-            setVictims(prev => prev.map(v => v.id === victimId ? { ...v, status: "SAFE", level: "green" } : v));
+            const { victimId, payload } = data.payload;
+            setVictims(prev => {
+              const exists = prev.some(v => v.id === victimId);
+              if (exists) {
+                return prev.map(v => v.id === victimId ? { ...v, status: "SAFE", level: "green" } : v);
+              } else if (payload) {
+                // If they marked safe without an active SOS, add them as a green dot
+                return [payload, ...prev];
+              }
+              return prev;
+            });
           } else if (data.type === 'CLEAR_ALL') {
             setVictims([]);
             setAdminIncomingAlert(null);
@@ -199,12 +222,17 @@ export const EmergencyProvider = ({ children }) => {
   // INSTANT 100% REAL SOS SIGNAL TRIGGER (Works on Mobile Phone & Laptop)
   const triggerSOS = async (customData = {}) => {
     const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent);
+    
+    // Spread them out slightly so multiple phones in the same room don't overlap perfectly on the map
+    const scatterLat = userLocation.lat + (Math.random() - 0.5) * 0.002;
+    const scatterLng = userLocation.lng + (Math.random() - 0.5) * 0.002;
+
     const realSosPayload = {
-      id: `VIC-${Math.floor(1000 + Math.random() * 9000)}`,
+      id: deviceIdentity.id, // Persistent device ID so the same phone updates its own dot!
       name: customData.name || (isMobile ? "Mobile Citizen SOS" : "Real Citizen SOS Report"),
-      phone: customData.phone || "+91 98490 88776",
-      lat: userLocation.lat + (Math.random() - 0.5) * 0.005,
-      lng: userLocation.lng + (Math.random() - 0.5) * 0.005,
+      phone: customData.phone || deviceIdentity.phone,
+      lat: scatterLat,
+      lng: scatterLng,
       city: userLocation.city,
       state: "Telangana",
       level: "red",
@@ -212,7 +240,7 @@ export const EmergencyProvider = ({ children }) => {
       battery: batteryLevel,
       network: isMobile ? "Mobile Cellular 4G/5G" : networkStatus,
       lastSeen: "Just Now",
-      waterDepthMeters: customData.waterDepth || 2.1,
+      waterDepthMeters: customData.waterDepth || (Math.random() * 2 + 1).toFixed(1), // Randomize depth for realism
       waitTimeMinutes: 0,
       age: customData.age || 42,
       isSenior: customData.isSenior || false,
@@ -240,12 +268,16 @@ export const EmergencyProvider = ({ children }) => {
 
   // INSTANT SAFE STATUS FUNCTION
   const markSafe = async () => {
+    const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent);
+    const scatterLat = userLocation.lat + (Math.random() - 0.5) * 0.002;
+    const scatterLng = userLocation.lng + (Math.random() - 0.5) * 0.002;
+
     const safePayload = {
-      id: currentSOS ? currentSOS.id : `VIC-SAFE-${Math.floor(1000 + Math.random() * 9000)}`,
+      id: deviceIdentity.id,
       name: "Real Citizen Safe Report",
-      phone: "+91 98490 88776",
-      lat: userLocation.lat,
-      lng: userLocation.lng,
+      phone: deviceIdentity.phone,
+      lat: currentSOS ? currentSOS.lat : scatterLat,
+      lng: currentSOS ? currentSOS.lng : scatterLng,
       city: userLocation.city,
       state: "Telangana",
       level: "green",
@@ -265,10 +297,10 @@ export const EmergencyProvider = ({ children }) => {
 
     setVictims(prev => [safePayload, ...prev.filter(v => v.id !== safePayload.id)]);
 
-    await broadcastMessage('MARK_SAFE', { victimId: safePayload.id });
+    await broadcastMessage('MARK_SAFE', { victimId: safePayload.id, payload: safePayload });
   };
 
-  // Clear all incidents helper
+  // Clear all incidents helper (Only triggered manually by Admin now)
   const clearAllIncidents = async () => {
     setVictims([]);
     setAdminIncomingAlert(null);
