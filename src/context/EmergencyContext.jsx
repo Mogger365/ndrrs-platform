@@ -40,7 +40,9 @@ export const EmergencyProvider = ({ children }) => {
   const [rescueTeams, setRescueTeams] = useState(mockRescueTeams);
   const [resources, setResources] = useState(mockResources);
 
-  const serverUrl = `http://${window.location.hostname}:3001`;
+  const serverUrl = typeof window !== 'undefined' && window.location.origin.includes('localhost')
+    ? `http://${window.location.hostname}:3001`
+    : (typeof window !== 'undefined' ? window.location.origin : '');
 
   // Audio synthesize announcement & Emergency Siren
   const speakAlert = (text) => {
