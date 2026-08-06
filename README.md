@@ -1,16 +1,20 @@
-# React + Vite
+# National Disaster Response and Rescue System (NDRRS)
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+> **"Saving Lives Through Real-Time Disaster Intelligence and Emergency Response."**
 
-Currently, two official plugins are available:
+NDRRS is an advanced web-based emergency response platform designed for real-time disaster management, live citizen location tracking, and rescue task force synchronization across India.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Live Demo
+- **Live Web Application**: [https://karthiky2.github.io/ndrrs-platform/](https://karthiky2.github.io/ndrrs-platform/)
 
-## React Compiler
+## ✨ Key Features
+- **0-Second Instant SOS**: One-tap emergency rescue dispatch with zero modals or delay.
+- **100% Real Live Citizen Tracking**: Zero fake/dummy cases. Map populates only when real citizens trigger SOS or Safe status.
+- **GIS Map & Zoom Earth Radar**: Integrated Doppler rain radar, storm tracking, and zone-based breathing light markers (🔴 Red, 🟠 Orange, 🟢 Green).
+- **AI Rescue Priority Queue**: Ranks live victims based on flood depth, age, vulnerabilities, and phone battery level.
+- **Multi-Device & Public Internet Sync**: Syncs emergency SOS signals from mobile phones directly to the Admin Command Center over 4G/5G/Wi-Fi.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## 🛠️ Built With
+- **Core**: React, Vite, HTML5, Vanilla CSS
+- **Mapping & Charts**: Leaflet GIS, Recharts
+- **Icons**: Lucide React
