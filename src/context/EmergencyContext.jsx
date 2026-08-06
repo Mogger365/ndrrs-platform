@@ -6,6 +6,8 @@ import { mockResources } from '../mockData/mockResources';
 
 const EmergencyContext = createContext();
 
+const CLOUD_SYNC_CHANNEL = 'https://ntfy.sh/ndrrs_india_emergency_live_channel_v1';
+
 export const EmergencyProvider = ({ children }) => {
   const initialPortal = new URLSearchParams(window.location.search).get('portal') === 'admin' ? 'admin' : 'citizen';
   const [portal, setPortal] = useState(initialPortal); // 'citizen' | 'admin'
@@ -30,9 +32,6 @@ export const EmergencyProvider = ({ children }) => {
   // Real-time Admin SOS Alert Toast State
   const [adminIncomingAlert, setAdminIncomingAlert] = useState(null);
 
-  // Offline Sync Queue
-  const [offlineQueue, setOfflineQueue] = useState([]);
-
   // Live Real Victims State - Starts EMPTY [] for 100% REAL citizen reports!
   const [victims, setVictims] = useState([]);
   const [shelters, setShelters] = useState(mockShelters);
@@ -44,14 +43,7 @@ export const EmergencyProvider = ({ children }) => {
     ? `http://${window.location.hostname}:3001`
     : (typeof window !== 'undefined' ? window.location.origin : '');
 
-  // Audio synthesize announcement & Emergency Siren (Spoken Voice Disabled)
-  const speakAlert = (text) => {
-    // Spoken voice announcements disabled for silent emergency operation
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
-  };
-
+  // Emergency Siren Sound Generator (Audio Synthesizer)
   const playSirenSound = () => {
     try {
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -102,35 +94,39 @@ export const EmergencyProvider = ({ children }) => {
     }
   }, []);
 
-  // Multi-Device Network Polling & Broadcast Sync
+  // Real-time Global Cloud Pub-Sub Stream (SSE EventSource for 0.2s cross-device sync)
   useEffect(() => {
-    const fetchIncidents = async () => {
-      try {
-        const res = await fetch(`${serverUrl}/api/incidents`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.incidents) {
-            setVictims(prev => {
-              // Check if any new red SOS signal arrived from mobile phone
-              const newSos = data.incidents.find(i => i.level === 'red' && !prev.some(p => p.id === i.id));
-              if (newSos) {
-                setAdminIncomingAlert(newSos);
+    let eventSource = null;
+    try {
+      eventSource = new EventSource(`${CLOUD_SYNC_CHANNEL}/json`);
+      eventSource.onmessage = (event) => {
+        try {
+          const raw = JSON.parse(event.data);
+          if (raw.message) {
+            const data = JSON.parse(raw.message);
+            if (data.type === 'NEW_SOS') {
+              const newVictim = data.payload;
+              setVictims(prev => [newVictim, ...prev.filter(v => v.id !== newVictim.id)]);
+              if (newVictim.level === 'red') {
+                setAdminIncomingAlert(newVictim);
                 playSirenSound();
-                speakAlert(`REAL-TIME MOBILE SOS RECEIVED! ${newSos.name} in ${newSos.city} requested rescue!`);
               }
-              return data.incidents;
-            });
+            } else if (data.type === 'MARK_SAFE') {
+              const { victimId } = data.payload;
+              setVictims(prev => prev.map(v => v.id === victimId ? { ...v, status: "SAFE", level: "green" } : v));
+            } else if (data.type === 'CLEAR_ALL') {
+              setVictims([]);
+              setAdminIncomingAlert(null);
+            }
           }
-        }
-      } catch (e) {
-        // Network server quiet fallback
-      }
-    };
+        } catch (e) {}
+      };
+    } catch (e) {}
 
-    fetchIncidents();
-    const interval = setInterval(fetchIncidents, 1500);
-    return () => clearInterval(interval);
-  }, [serverUrl]);
+    return () => {
+      if (eventSource) eventSource.close();
+    };
+  }, []);
 
   // BroadcastChannel inter-tab fallback
   useEffect(() => {
@@ -144,7 +140,6 @@ export const EmergencyProvider = ({ children }) => {
           if (newVictim.level === 'red') {
             setAdminIncomingAlert(newVictim);
             playSirenSound();
-            speakAlert(`REAL-TIME SOS RECEIVED! ${newVictim.name} in ${newVictim.city} requires immediate rescue!`);
           }
         } else if (event.data?.type === 'MARK_SAFE') {
           const { victimId } = event.data.payload;
@@ -184,13 +179,22 @@ export const EmergencyProvider = ({ children }) => {
     };
   }, []);
 
-  // Broadcast function helper
-  const broadcastMessage = (type, payload) => {
+  // Broadcast function helper (Inter-tab + Global Cloud Stream)
+  const broadcastMessage = async (type, payload) => {
     if ('BroadcastChannel' in window) {
       const bc = new BroadcastChannel('ndrrs_emergency_sync');
       bc.postMessage({ type, payload });
       bc.close();
     }
+
+    // Publish to Global Cloud Relay Stream for instant 0.2s mobile-to-laptop sync
+    try {
+      await fetch(CLOUD_SYNC_CHANNEL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, payload })
+      });
+    } catch (e) {}
   };
 
   // INSTANT 100% REAL SOS SIGNAL TRIGGER (Works on Mobile Phone & Laptop)
@@ -207,7 +211,7 @@ export const EmergencyProvider = ({ children }) => {
       level: "red",
       status: "CRITICAL",
       battery: batteryLevel,
-      network: isMobile ? "Mobile Wi-Fi/4G" : networkStatus,
+      network: isMobile ? "Mobile Wi-Fi/4G/5G" : networkStatus,
       lastSeen: "Just Now",
       waterDepthMeters: customData.waterDepth || 2.1,
       waitTimeMinutes: 0,
@@ -229,20 +233,9 @@ export const EmergencyProvider = ({ children }) => {
 
     setVictims(prev => [realSosPayload, ...prev.filter(v => v.id !== realSosPayload.id)]);
 
-    // POST to Sync Server so laptop receives it across the local network
-    try {
-      await fetch(`${serverUrl}/api/sos`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(realSosPayload)
-      });
-    } catch (e) {}
-
-    // Broadcast across browser tabs
+    // Broadcast across browser tabs and global cloud stream
     broadcastMessage('NEW_SOS', realSosPayload);
-
     playSirenSound();
-    speakAlert("Emergency SOS Transmitted! NDRF Disaster Command notified.");
   };
 
   // INSTANT SAFE STATUS FUNCTION
@@ -272,27 +265,15 @@ export const EmergencyProvider = ({ children }) => {
 
     setVictims(prev => [safePayload, ...prev.filter(v => v.id !== safePayload.id)]);
 
-    try {
-      await fetch(`${serverUrl}/api/safe`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(safePayload)
-      });
-    } catch (e) {}
-
     broadcastMessage('MARK_SAFE', { victimId: safePayload.id });
     broadcastMessage('NEW_SOS', safePayload);
-
-    speakAlert("Status registered as SAFE with Government Control.");
   };
 
   // Clear all incidents helper
   const clearAllIncidents = async () => {
     setVictims([]);
     setAdminIncomingAlert(null);
-    try {
-      await fetch(`${serverUrl}/api/incidents`, { method: 'DELETE' });
-    } catch (e) {}
+    broadcastMessage('CLEAR_ALL', {});
   };
 
   // Assign Rescue Team to Victim
@@ -313,7 +294,6 @@ export const EmergencyProvider = ({ children }) => {
     } : t));
 
     broadcastMessage('TEAM_DISPATCHED', { victimId, teamName });
-    speakAlert(`Task force assigned to victim.`);
   };
 
   return (
@@ -334,10 +314,8 @@ export const EmergencyProvider = ({ children }) => {
       rescueTeams, setRescueTeams,
       resources, setResources,
       adminIncomingAlert, setAdminIncomingAlert,
-      offlineQueue,
       clearAllIncidents,
-      assignTeamToVictim,
-      speakAlert
+      assignTeamToVictim
     }}>
       {children}
     </EmergencyContext.Provider>
