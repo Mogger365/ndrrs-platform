@@ -6,7 +6,7 @@ import { AlertCircle, ShieldCheck, MapPin, Battery, Signal, Clock, FileText, Che
 export const EmergencyHero = ({ onOpenModal }) => {
   const {
     userLocation, batteryLevel, networkStatus, isSOSActive,
-    isSafeRegistered, triggerSOS, markSafe
+    isSafeRegistered, triggerSOS, markSafe, currentSOS
   } = useEmergency();
   const { t } = useLanguage();
 
