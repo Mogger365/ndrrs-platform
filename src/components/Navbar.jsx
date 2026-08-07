@@ -159,13 +159,13 @@ export const Navbar = () => {
               cursor: 'pointer'
             }}
           >
-            <option value="collector">Role: District Collector</option>
-            <option value="ndrf">Role: NDRF Commander</option>
-            <option value="sdrf">Role: SDRF Unit</option>
-            <option value="police">Role: Police Control Room</option>
-            <option value="fire">Role: Fire & Rescue</option>
-            <option value="ambulance">Role: Medical Ambulance</option>
-            <option value="volunteer">Role: Verified Volunteer</option>
+            <option value="collector" style={{ background: '#7f1d1d', color: '#fca5a5' }}>Role: District Collector</option>
+            <option value="ndrf" style={{ background: '#7f1d1d', color: '#fca5a5' }}>Role: NDRF Commander</option>
+            <option value="sdrf" style={{ background: '#7f1d1d', color: '#fca5a5' }}>Role: SDRF Unit</option>
+            <option value="police" style={{ background: '#7f1d1d', color: '#fca5a5' }}>Role: Police Control Room</option>
+            <option value="fire" style={{ background: '#7f1d1d', color: '#fca5a5' }}>Role: Fire & Rescue</option>
+            <option value="ambulance" style={{ background: '#7f1d1d', color: '#fca5a5' }}>Role: Medical Ambulance</option>
+            <option value="volunteer" style={{ background: '#7f1d1d', color: '#fca5a5' }}>Role: Verified Volunteer</option>
           </select>
         )}
 
@@ -187,9 +187,9 @@ export const Navbar = () => {
               cursor: 'pointer'
             }}
           >
-            <option value="en">English</option>
-            <option value="hi">हिंदी (Hindi)</option>
-            <option value="te">తెలుగు (Telugu)</option>
+            <option value="en" style={{ background: '#e0f2fe', color: '#0f172a' }}>English</option>
+            <option value="hi" style={{ background: '#e0f2fe', color: '#0f172a' }}>हिंदी (Hindi)</option>
+            <option value="te" style={{ background: '#e0f2fe', color: '#0f172a' }}>తెలుగు (Telugu)</option>
           </select>
         </div>
 
@@ -213,9 +213,9 @@ export const Navbar = () => {
               cursor: 'pointer'
             }}
           >
-            <option value="dark">🌙 Dark Mode</option>
-            <option value="light">☀️ Light Mode</option>
-            <option value="low-bandwidth">⚡ Low Bandwidth</option>
+            <option value="dark" style={{ background: '#1e293b', color: '#f8fafc' }}>🌙 Dark Mode</option>
+            <option value="light" style={{ background: '#1e293b', color: '#f8fafc' }}>☀️ Light Mode</option>
+            <option value="low-bandwidth" style={{ background: '#1e293b', color: '#f8fafc' }}>⚡ Low Bandwidth</option>
           </select>
         )}
 
