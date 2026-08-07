@@ -114,13 +114,59 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .glass-panel-glow-danger {
-  border-color: rgba(239, 68, 68, 0.4);
-  box-shadow: 0 0 25px rgba(239, 68, 68, 0.25);
+  border: 1px solid var(--danger-red);
+  box-shadow: 0 0 20px var(--danger-glow);
+}
+
+.glass-panel-glow-warning {
+  border: 1px solid var(--warning-orange);
+  box-shadow: 0 0 20px var(--warning-glow);
 }
 
 .glass-panel-glow-safe {
-  border-color: rgba(16, 185, 129, 0.4);
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+  border: 1px solid var(--safe-green);
+  box-shadow: 0 0 20px var(--safe-glow);
+}
+
+/* Gemini-style AI Glowing Loop Border */
+.ai-terminal-wrapper {
+  position: relative;
+  padding: 2px; /* Border thickness */
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 0 25px rgba(56, 189, 248, 0.25);
+}
+
+.ai-terminal-wrapper::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    transparent 60%,
+    #38bdf8 100%
+  );
+  animation: rotateGlow 3s linear infinite;
+  z-index: 0;
+}
+
+.ai-terminal-content {
+  position: relative;
+  background: rgba(15, 23, 42, 0.95);
+  border-radius: 10px; 
+  padding: 1rem 1.25rem;
+  z-index: 1;
+  height: 100%;
+}
+
+@keyframes rotateGlow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Pulse & Breathing Animations */
