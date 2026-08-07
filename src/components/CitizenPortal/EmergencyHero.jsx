@@ -212,7 +212,7 @@ export const EmergencyHero = ({ onOpenModal }) => {
       {/* Main Dual Hero Buttons - Ultra Clean & Simple */}
       <div className="glass-panel" style={{ padding: '3rem 2rem', textAlign: 'center', border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: '20px' }}>
         <h2 style={{ fontSize: '2.1rem', fontWeight: 900, marginBottom: '0.5rem', background: 'linear-gradient(90deg, #f8fafc, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-          NATIONAL DISASTER EMERGENCY PORTAL
+          {t('appTitle').toUpperCase()}
         </h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', maxWidth: '650px', margin: '0 auto 2.5rem' }}>
           Official Government Emergency Interface. Select your status immediately:
@@ -232,7 +232,7 @@ export const EmergencyHero = ({ onOpenModal }) => {
             style={{ minHeight: '160px', flexDirection: 'column', gap: '0.6rem', padding: '2rem' }}
           >
             <AlertCircle size={56} />
-            <span style={{ fontSize: '1.5rem', fontWeight: 900 }}>🟥 EMERGENCY (SOS)</span>
+            <span style={{ fontSize: '1.5rem', fontWeight: 900 }}>🟥 {t('emergency')}</span>
             <span style={{ fontSize: '0.82rem', fontWeight: 600, opacity: 0.9 }}>
               Instant 0-Second Rescue Dispatch
             </span>
@@ -245,7 +245,7 @@ export const EmergencyHero = ({ onOpenModal }) => {
             style={{ minHeight: '160px', flexDirection: 'column', gap: '0.6rem', padding: '2rem' }}
           >
             <ShieldCheck size={52} />
-            <span style={{ fontSize: '1.35rem', fontWeight: 800 }}>🟩 SAFE / NEED HELP LATER</span>
+            <span style={{ fontSize: '1.35rem', fontWeight: 800 }}>🟩 {t('safe')}</span>
             <span style={{ fontSize: '0.82rem', fontWeight: 600, opacity: 0.9 }}>
               Mark Safe & Share Live Location
             </span>
