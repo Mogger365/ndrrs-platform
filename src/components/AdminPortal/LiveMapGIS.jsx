@@ -156,27 +156,6 @@ export const LiveMapGIS = ({ onOpenDispatch }) => {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-          {/* Region Filter */}
-          <select
-            value={selectedRegion}
-            onChange={(e) => setSelectedRegion(e.target.value)}
-            style={{
-              background: 'rgba(255, 255, 255, 0.08)',
-              border: '1px solid var(--bg-card-border)',
-              color: '#fff',
-              padding: '0.4rem 0.75rem',
-              borderRadius: '8px',
-              fontSize: '0.82rem',
-              fontWeight: 600,
-              outline: 'none',
-              cursor: 'pointer'
-            }}
-          >
-            <option value="ALL">📍 Entire India (Nationwide)</option>
-            <option value="Hyderabad">🌧 Hyderabad (Telangana)</option>
-            <option value="Wayanad">⛰ Wayanad (Kerala)</option>
-            <option value="Cuttack">🌊 Cuttack (Odisha)</option>
-          </select>
 
           {/* Optional Layer Toggles */}
           <button
