@@ -41,6 +41,7 @@ export const LiveMapGIS = ({ onOpenDispatch }) => {
   const [showZones, setShowZones] = useState(false);
   const [showShelters, setShowShelters] = useState(false);
   const [showTeams, setShowTeams] = useState(false);
+  const [showWeatherRadar, setShowWeatherRadar] = useState(false);
 
   // Filter victims based on region selection
   const filteredVictims = selectedRegion === 'ALL'
@@ -133,7 +134,7 @@ export const LiveMapGIS = ({ onOpenDispatch }) => {
           <h3 style={{ fontSize: '1.05rem', fontWeight: 800 }}>LIVE REAL-TIME EMERGENCY MAP ({filteredVictims.length} CASES)</h3>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
           {/* Region Filter */}
           <select
             value={selectedRegion}
@@ -157,6 +158,22 @@ export const LiveMapGIS = ({ onOpenDispatch }) => {
           </select>
 
           {/* Optional Layer Toggles */}
+          <button
+            onClick={() => setShowWeatherRadar(!showWeatherRadar)}
+            style={{
+              background: showWeatherRadar ? 'rgba(56, 189, 248, 0.25)' : 'rgba(255, 255, 255, 0.08)',
+              border: showWeatherRadar ? '1px solid #38bdf8' : '1px solid var(--bg-card-border)',
+              color: showWeatherRadar ? '#7dd3fc' : 'var(--text-secondary)',
+              padding: '0.4rem 0.65rem',
+              borderRadius: '8px',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            🌧️ Weather Radar: {showWeatherRadar ? 'ON' : 'OFF'}
+          </button>
+
           <button
             onClick={() => setShowShelters(!showShelters)}
             style={{
@@ -325,6 +342,30 @@ export const LiveMapGIS = ({ onOpenDispatch }) => {
         }}>
           <Radio size={16} className="animate-pulse-red" />
           <span>MAP CLEAN • ZERO ACTIVE CASES (Listening for Live Citizen SOS)...</span>
+        </div>
+      )}
+
+      {/* Embedded Responsive Zoom Earth Weather Radar PiP */}
+      {showWeatherRadar && (
+        <div style={{
+          position: 'absolute',
+          bottom: '2rem',
+          right: '2rem',
+          width: '380px',
+          height: '280px',
+          zIndex: 1200,
+          borderRadius: '12px',
+          overflow: 'hidden',
+          border: '2px solid #38bdf8',
+          boxShadow: '0 10px 40px rgba(0,0,0,0.7)',
+          background: '#0b0f19'
+        }}>
+          <iframe
+            src="https://zoom.earth/maps/precipitation/#view=18.0727,78.5718,7z/place=16.189734,78.019142/model=icon"
+            title="Zoom Earth Live Radar Weather Map"
+            style={{ width: '100%', height: '100%', border: 'none' }}
+            allow="geolocation"
+          />
         </div>
       )}
     </div>
