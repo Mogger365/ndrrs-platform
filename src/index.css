@@ -157,7 +157,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .ai-terminal-content {
   position: relative;
-  background: rgba(15, 23, 42, 0.95);
+  background: #0f172a; /* Completely opaque to hide the glow in the middle */
   border-radius: 10px; 
   padding: 1rem 1.25rem;
   z-index: 1;
