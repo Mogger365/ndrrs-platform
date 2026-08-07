@@ -114,6 +114,34 @@ export const Navbar = () => {
 
       {/* Right Controls */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+        {/* Hidden Admin Access Button for Citizens */}
+        {!isAdmin && (
+          <button
+            onClick={() => {
+              const pwd = prompt("Enter Admin Password:");
+              if (pwd === "nrcm123") {
+                setPortal('admin');
+              } else if (pwd !== null) {
+                alert("Incorrect password.");
+              }
+            }}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--text-secondary)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '0.4rem',
+              borderRadius: '50%',
+            }}
+            title="Admin Login"
+          >
+            <ShieldAlert size={16} />
+          </button>
+        )}
+
         {/* Admin Role Selector (Admin Portal Only) */}
         {isAdmin && (
           <select
