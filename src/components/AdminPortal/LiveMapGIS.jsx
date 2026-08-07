@@ -412,8 +412,8 @@ export const LiveMapGIS = ({ onOpenDispatch }) => {
           background: '#0b0f19'
         }}>
           <iframe
-            src="https://zoom.earth/maps/precipitation/#view=18.0727,78.5718,7z/place=16.189734,78.019142/model=icon"
-            title="Zoom Earth Live Radar Weather Map"
+            src="https://embed.windy.com/embed2.html?lat=17.385&lon=78.486&zoom=6&level=surface&overlay=rain&product=ecmwf&menu=&message=&marker=&calendar=now&city=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"
+            title="Live Radar Weather Map"
             style={{ width: '100%', height: '100%', border: 'none' }}
             allow="geolocation"
           />
