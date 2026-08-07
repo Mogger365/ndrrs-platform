@@ -12,6 +12,7 @@ export const EmergencyHero = ({ onOpenModal }) => {
 
   const [showSharedPopup, setShowSharedPopup] = useState(false);
   const [dispatchPopup, setDispatchPopup] = useState(null);
+  const [showSafePopup, setShowSafePopup] = useState(false);
 
   // Effect to trigger "Shared" popup
   useEffect(() => {
@@ -31,10 +32,17 @@ export const EmergencyHero = ({ onOpenModal }) => {
         eta: "approx. 12 mins"
       });
       // Optionally auto-hide after 8 seconds
-      const timer = setTimeout(() => setDispatchPopup(null), 8000);
+      const timer = setTimeout(() => setDispatchPopup(null), 10000);
       return () => clearTimeout(timer);
     }
   }, [currentSOS]);
+
+  // Effect to trigger "Safe Shelter" popup
+  useEffect(() => {
+    if (isSafeRegistered && !isSOSActive) {
+      setShowSafePopup(true);
+    }
+  }, [isSafeRegistered, isSOSActive]);
 
   return (
     <div style={{ padding: '2rem 1.5rem', maxWidth: '900px', margin: '0 auto', position: 'relative' }}>
@@ -84,6 +92,46 @@ export const EmergencyHero = ({ onOpenModal }) => {
         </div>
       )}
       
+      {/* 3. POPUP: Safe Shelter & Resources */}
+      {showSafePopup && (
+        <div style={{
+          position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+          background: 'rgba(15,23,42,0.95)', border: '2px solid #10b981', padding: '2rem',
+          borderRadius: '16px', zIndex: 9999, display: 'flex', flexDirection: 'column',
+          alignItems: 'center', gap: '1rem', width: '90%', maxWidth: '420px',
+          boxShadow: '0 20px 50px rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)', textAlign: 'center'
+        }}>
+          <div className="animate-pulse-green" style={{ background: '#10b981', borderRadius: '50%', padding: '1rem', color: '#fff' }}>
+            <Home size={40} />
+          </div>
+          <h2 style={{ fontSize: '1.4rem', color: '#fff', fontWeight: 900, margin: 0 }}>
+            SAFE SHELTER RESOURCES
+          </h2>
+          <p style={{ fontSize: '0.9rem', color: '#cbd5e1', marginBottom: '0.5rem' }}>
+            The Government has provided emergency shelter, food, and medical supplies near your safe location.
+          </p>
+          <div style={{ fontSize: '0.95rem', width: '100%', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <button 
+              onClick={() => { setShowSafePopup(false); onOpenModal('shelters'); }} 
+              className="btn btn-primary" 
+              style={{ width: '100%', padding: '0.8rem', background: '#0ea5e9' }}
+            >
+              📍 View Official Shelter Locations
+            </button>
+            <button 
+              onClick={() => { setShowSafePopup(false); window.open('https://ndma.gov.in', '_blank'); }} 
+              className="btn" 
+              style={{ width: '100%', padding: '0.8rem', background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid var(--bg-card-border)' }}
+            >
+              🍚 Request Food & Medicine Drop
+            </button>
+          </div>
+          <button onClick={() => setShowSafePopup(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', textDecoration: 'underline', marginTop: '0.5rem', cursor: 'pointer' }}>
+            Close
+          </button>
+        </div>
+      )}
+
       {/* 1. SOS Active Status Banner */}
       {isSOSActive && (
         <div className="glass-panel glass-panel-glow-danger" style={{ padding: '1.5rem', marginBottom: '1.5rem', background: 'rgba(239, 68, 68, 0.18)' }}>
