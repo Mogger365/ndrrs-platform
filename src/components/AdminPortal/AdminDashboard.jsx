@@ -49,6 +49,34 @@ export const AdminDashboard = ({ onOpenDispatch }) => {
         )}
       </div>
 
+      {/* NDRS.AI Live Agent Terminal */}
+      <div style={{
+        background: 'rgba(15, 23, 42, 0.85)',
+        border: '1px solid #38bdf8',
+        borderRadius: '12px',
+        padding: '1rem 1.25rem',
+        marginBottom: '1.25rem',
+        boxShadow: '0 0 15px rgba(56, 189, 248, 0.15)',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.75rem', borderBottom: '1px solid rgba(56, 189, 248, 0.2)', paddingBottom: '0.5rem' }}>
+          <Cpu size={18} color="#38bdf8" />
+          <strong style={{ color: '#38bdf8', fontSize: '1rem', fontWeight: 800 }}>NDRS.AI Autonomous Dispatch Agent</strong>
+          <span className="animate-pulse-green" style={{ width: '8px', height: '8px', background: '#10b981', borderRadius: '50%', marginLeft: '0.5rem' }}></span>
+          <span style={{ fontSize: '0.75rem', color: '#10b981' }}>ONLINE</span>
+        </div>
+        <div style={{ maxHeight: '120px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: '0.82rem', fontFamily: 'monospace' }}>
+          {/* @ts-ignore - aiLogs is passed from context but we need to fetch it */}
+          {useEmergency().aiLogs.map((log, idx) => (
+            <div key={idx} style={{ color: idx === 0 ? '#fff' : 'var(--text-secondary)' }}>
+              <span style={{ color: '#94a3b8', marginRight: '0.5rem' }}>[{log.time}]</span>
+              {log.msg}
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Navigation Tabs */}
       <div style={{
         display: 'flex',

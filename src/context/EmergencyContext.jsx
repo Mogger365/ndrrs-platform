@@ -54,6 +54,15 @@ export const EmergencyProvider = ({ children }) => {
   const [alerts, setAlerts] = useState(mockWeatherAlerts);
   const [rescueTeams, setRescueTeams] = useState(mockRescueTeams);
   const [resources, setResources] = useState(mockResources);
+  
+  // NDRS.AI Log Feed
+  const [aiLogs, setAiLogs] = useState([
+    { time: new Date().toLocaleTimeString(), msg: "NDRS.AI System Initialized. Monitoring nationwide telemetry..." }
+  ]);
+
+  const addAILog = (msg) => {
+    setAiLogs(prev => [{ time: new Date().toLocaleTimeString(), msg }, ...prev].slice(0, 10)); // Keep last 10 logs
+  };
 
   // Keep a reference to the MQTT client
   const mqttClientRef = useRef(null);
@@ -169,6 +178,7 @@ const initAudio = () => {
               if (newVictim.level === 'red' && !wasRed) {
                 setAdminIncomingAlert(newVictim);
                 playSirenSound();
+                addAILog(`🚨 CRITICAL SOS detected: ${newVictim.name} at ${newVictim.lat.toFixed(4)}, ${newVictim.lng.toFixed(4)}.`);
               }
               return [newVictim, ...prev.filter(v => v.id !== newVictim.id)];
             });
@@ -316,6 +326,7 @@ const initAudio = () => {
       // Auto-assign the team to this victim
       assignTeamToVictim(realSosPayload.id, teamIdToAssign, randomVehicle);
       
+      addAILog(`✅ AUTOMATED DISPATCH: ${randomTeam ? randomTeam.name : teamIdToAssign} en route to ${realSosPayload.name} via ${randomVehicle}.`);
       console.log("NDRS.AI: Automated dispatch complete for", realSosPayload.name);
     }, 5000); // 5-second delay to simulate AI processing time
   };
@@ -407,7 +418,8 @@ const initAudio = () => {
       adminIncomingAlert, setAdminIncomingAlert,
       clearAllIncidents,
       assignTeamToVictim,
-      triggerTargetedSiren
+      triggerTargetedSiren,
+      aiLogs, addAILog
     }}>
       {children}
     </EmergencyContext.Provider>
