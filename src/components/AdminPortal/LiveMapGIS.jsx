@@ -1,8 +1,19 @@
-import React, { useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
+import React, { useState, useRef, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { useEmergency } from '../../context/EmergencyContext';
-import { Shield, AlertCircle, Phone, Battery, MapPin, Send, Radio, X, BellRing, Home, Users } from 'lucide-react';
+import { Shield, AlertCircle, Phone, Battery, MapPin, Send, Radio, X, BellRing, Home, Users, Maximize } from 'lucide-react';
+
+// Component to handle automatic map zooming when a new alert arrives
+const MapAutoZoomController = ({ alert }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (alert && alert.lat && alert.lng) {
+      map.flyTo([alert.lat, alert.lng], 14, { duration: 1.5 }); // 14 gives approximately a 50% city-level zoom
+    }
+  }, [alert, map]);
+  return null;
+};
 
 // Custom Map Markers with Zone-based Breathing Light Animations
 const createCustomIcon = (level, text = '') => {
@@ -43,13 +54,23 @@ export const LiveMapGIS = ({ onOpenDispatch }) => {
   const [showTeams, setShowTeams] = useState(false);
   const [showWeatherRadar, setShowWeatherRadar] = useState(false);
 
+  const mapWrapperRef = useRef(null);
+
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+      if (mapWrapperRef.current) mapWrapperRef.current.requestFullscreen();
+    } else {
+      if (document.exitFullscreen) document.exitFullscreen();
+    }
+  };
+
   // Filter victims based on region selection
   const filteredVictims = selectedRegion === 'ALL'
     ? victims
     : victims.filter(v => v.city.toLowerCase().includes(selectedRegion.toLowerCase()) || v.state.toLowerCase().includes(selectedRegion.toLowerCase()));
 
   return (
-    <div className="glass-panel" style={{ height: '640px', position: 'relative', overflow: 'hidden', borderRadius: '16px' }}>
+    <div ref={mapWrapperRef} className="glass-panel" style={{ height: '640px', position: 'relative', overflow: 'hidden', borderRadius: '16px', background: '#0b0f19' }}>
       
       {/* Real-time Broadcast Emergency Alert Toast */}
       {adminIncomingAlert && (
@@ -221,6 +242,25 @@ export const LiveMapGIS = ({ onOpenDispatch }) => {
           >
             🔴 Zones: {showZones ? 'ON' : 'OFF'}
           </button>
+
+          {/* Full Screen Toggle Button */}
+          <button
+            onClick={toggleFullScreen}
+            style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid var(--bg-card-border)',
+              color: '#fff',
+              padding: '0.4rem 0.65rem',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer'
+            }}
+            title="Toggle Full Screen"
+          >
+            <Maximize size={16} />
+          </button>
         </div>
       </div>
 
@@ -234,6 +274,8 @@ export const LiveMapGIS = ({ onOpenDispatch }) => {
         style={{ width: '100%', height: '100%' }}
         scrollWheelZoom={true}
       >
+        <MapAutoZoomController alert={adminIncomingAlert} />
+        
         <TileLayer
           url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
           attribution='&copy; <a href="https://carto.com/">CARTO</a> NDRRS India'
