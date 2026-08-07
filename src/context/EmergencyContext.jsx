@@ -174,6 +174,17 @@ export const EmergencyProvider = ({ children }) => {
           } else if (data.type === 'TEAM_DISPATCHED') {
             const { victimId, teamName } = data.payload;
             setVictims(prev => prev.map(v => v.id === victimId ? { ...v, status: "DISPATCHED", assignedTeam: teamName } : v));
+          } else if (data.type === 'PLAY_TARGETED_SIREN') {
+            // Target Acoustic Siren Feature
+            const { targetDeviceId } = data.payload;
+            if (targetDeviceId === deviceIdentity.id) {
+              console.log("CRITICAL: Targeted siren activated by Admin Command Center!");
+              playSirenSound();
+              // Play it multiple times for a louder alarm effect
+              setTimeout(playSirenSound, 600);
+              setTimeout(playSirenSound, 1200);
+              setTimeout(playSirenSound, 1800);
+            }
           }
         } catch (err) {}
       }
@@ -327,6 +338,11 @@ export const EmergencyProvider = ({ children }) => {
     broadcastMessage('TEAM_DISPATCHED', { victimId, teamName });
   };
 
+  // Target Acoustic Siren Beacon
+  const triggerTargetedSiren = async (targetDeviceId) => {
+    await broadcastMessage('PLAY_TARGETED_SIREN', { targetDeviceId });
+  };
+
   return (
     <EmergencyContext.Provider value={{
       portal, setPortal,
@@ -346,7 +362,8 @@ export const EmergencyProvider = ({ children }) => {
       resources, setResources,
       adminIncomingAlert, setAdminIncomingAlert,
       clearAllIncidents,
-      assignTeamToVictim
+      assignTeamToVictim,
+      triggerTargetedSiren
     }}>
       {children}
     </EmergencyContext.Provider>

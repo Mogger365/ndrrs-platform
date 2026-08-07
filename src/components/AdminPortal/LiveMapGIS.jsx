@@ -46,7 +46,7 @@ const createCustomIcon = (level, text = '') => {
 };
 
 export const LiveMapGIS = ({ onOpenDispatch }) => {
-  const { victims, shelters, rescueTeams, adminIncomingAlert, setAdminIncomingAlert } = useEmergency();
+  const { victims, shelters, rescueTeams, adminIncomingAlert, setAdminIncomingAlert, triggerTargetedSiren } = useEmergency();
   const [selectedRegion, setSelectedRegion] = useState('ALL');
   const [showRadarOverlay, setShowRadarOverlay] = useState(false);
   const [showZones, setShowZones] = useState(false);
@@ -315,13 +315,22 @@ export const LiveMapGIS = ({ onOpenDispatch }) => {
                     <div>Assigned Team: <strong style={{ color: '#38bdf8' }}>{vic.assignedTeam || 'Unassigned'}</strong></div>
                   </div>
 
-                  <button
-                    onClick={() => onOpenDispatch(vic)}
-                    className="btn btn-emergency"
-                    style={{ width: '100%', fontSize: '0.8rem', padding: '0.45rem' }}
-                  >
-                    <Send size={14} /> DISPATCH RESCUE TEAM
-                  </button>
+                  <div style={{ display: 'flex', gap: '0.4rem' }}>
+                    <button
+                      onClick={() => onOpenDispatch(vic)}
+                      className="btn btn-emergency"
+                      style={{ flex: 1, fontSize: '0.75rem', padding: '0.4rem' }}
+                    >
+                      <Send size={14} /> DISPATCH
+                    </button>
+                    <button
+                      onClick={() => triggerTargetedSiren(vic.id)}
+                      className="btn"
+                      style={{ flex: 1, fontSize: '0.75rem', padding: '0.4rem', background: '#eab308', color: '#000', border: 'none', fontWeight: 'bold' }}
+                    >
+                      <BellRing size={14} /> PLAY SIREN
+                    </button>
+                  </div>
                 </div>
               </Popup>
             </Marker>
