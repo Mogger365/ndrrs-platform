@@ -299,6 +299,25 @@ const initAudio = () => {
     // Transmit instantly via MQTT Broker
     await broadcastMessage('NEW_SOS', realSosPayload);
     playSirenSound();
+
+    // ==========================================
+    // NDRS.AI AUTOMATED DISPATCH SIMULATION
+    // ==========================================
+    setTimeout(() => {
+      // AI checks available teams and automatically dispatches one
+      const availableTeams = mockRescueTeams || [];
+      const vehicles = ["Offroad 4x4 Rescue Truck", "Inflatable Rescue Boat", "Heavy Duty Disaster Boat", "Helicopter / Aerial Lift"];
+      
+      const randomTeam = availableTeams[Math.floor(Math.random() * availableTeams.length)];
+      const randomVehicle = vehicles[Math.floor(Math.random() * vehicles.length)];
+      
+      const teamIdToAssign = randomTeam ? randomTeam.id : 'TEAM-001';
+      
+      // Auto-assign the team to this victim
+      assignTeamToVictim(realSosPayload.id, teamIdToAssign, randomVehicle);
+      
+      console.log("NDRS.AI: Automated dispatch complete for", realSosPayload.name);
+    }, 5000); // 5-second delay to simulate AI processing time
   };
 
   // INSTANT SAFE STATUS FUNCTION

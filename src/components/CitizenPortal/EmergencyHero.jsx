@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useEmergency } from '../../context/EmergencyContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { AlertCircle, ShieldCheck, MapPin, Battery, Signal, Clock, FileText, CheckCircle2, Home } from 'lucide-react';
+import { AlertCircle, ShieldCheck, MapPin, Battery, Signal, Clock, FileText, CheckCircle2, Home, Check, Info } from 'lucide-react';
 
 export const EmergencyHero = ({ onOpenModal }) => {
   const {
@@ -10,8 +10,79 @@ export const EmergencyHero = ({ onOpenModal }) => {
   } = useEmergency();
   const { t } = useLanguage();
 
+  const [showSharedPopup, setShowSharedPopup] = useState(false);
+  const [dispatchPopup, setDispatchPopup] = useState(null);
+
+  // Effect to trigger "Shared" popup
+  useEffect(() => {
+    if (isSOSActive && currentSOS && currentSOS.status === "CRITICAL") {
+      setShowSharedPopup(true);
+      const timer = setTimeout(() => setShowSharedPopup(false), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [isSOSActive, currentSOS]);
+
+  // Effect to trigger "Dispatch" popup
+  useEffect(() => {
+    if (currentSOS && currentSOS.status === "DISPATCHED" && currentSOS.assignedTeam) {
+      setDispatchPopup({
+        team: currentSOS.assignedTeam,
+        vehicle: currentSOS.dispatchVehicle,
+        eta: "approx. 12 mins"
+      });
+      // Optionally auto-hide after 8 seconds
+      const timer = setTimeout(() => setDispatchPopup(null), 8000);
+      return () => clearTimeout(timer);
+    }
+  }, [currentSOS]);
+
   return (
-    <div style={{ padding: '2rem 1.5rem', maxWidth: '900px', margin: '0 auto' }}>
+    <div style={{ padding: '2rem 1.5rem', maxWidth: '900px', margin: '0 auto', position: 'relative' }}>
+      
+      {/* 1. POPUP: Response Shared */}
+      {showSharedPopup && (
+        <div style={{
+          position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)',
+          background: '#10b981', color: '#000', padding: '1rem 2rem', borderRadius: '30px',
+          fontWeight: '900', zIndex: 9999, display: 'flex', alignItems: 'center', gap: '0.75rem',
+          boxShadow: '0 10px 25px rgba(16,185,129,0.5)', animation: 'slide-down 0.3s ease-out'
+        }}>
+          <CheckCircle2 size={24} />
+          YOUR RESPONSE HAS BEEN SHARED TO OUR OFFICIAL!
+        </div>
+      )}
+
+      {/* 2. POPUP: Rescue Member Allocated */}
+      {dispatchPopup && (
+        <div style={{
+          position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+          background: 'rgba(15,23,42,0.95)', border: '2px solid #38bdf8', padding: '2rem',
+          borderRadius: '16px', zIndex: 9999, display: 'flex', flexDirection: 'column',
+          alignItems: 'center', gap: '1rem', width: '90%', maxWidth: '400px',
+          boxShadow: '0 20px 50px rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)', textAlign: 'center'
+        }}>
+          <div className="animate-pulse-green" style={{ background: '#38bdf8', borderRadius: '50%', padding: '1rem', color: '#000' }}>
+            <AlertCircle size={40} />
+          </div>
+          <h2 style={{ fontSize: '1.4rem', color: '#fff', fontWeight: 900, margin: 0 }}>
+            RESCUE MEMBER ALLOCATED
+          </h2>
+          <div style={{ fontSize: '1rem', color: '#cbd5e1', width: '100%' }}>
+            <div style={{ background: 'rgba(255,255,255,0.1)', padding: '0.75rem', borderRadius: '8px', marginBottom: '0.5rem' }}>
+              Person Name / Team: <strong style={{ color: '#38bdf8' }}>{dispatchPopup.team}</strong>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.1)', padding: '0.75rem', borderRadius: '8px', marginBottom: '0.5rem' }}>
+              Vehicle: <strong style={{ color: '#eab308' }}>{dispatchPopup.vehicle}</strong>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.1)', padding: '0.75rem', borderRadius: '8px' }}>
+              Time to Reach: <strong style={{ color: '#ef4444' }}>{dispatchPopup.eta}</strong>
+            </div>
+          </div>
+          <button onClick={() => setDispatchPopup(null)} className="btn btn-primary" style={{ width: '100%', marginTop: '0.5rem' }}>
+            Acknowledge
+          </button>
+        </div>
+      )}
       
       {/* 1. SOS Active Status Banner */}
       {isSOSActive && (
