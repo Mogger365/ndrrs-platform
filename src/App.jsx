@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { LanguageProvider } from './context/LanguageContext';
 import { EmergencyProvider, useEmergency } from './context/EmergencyContext';
 import { Navbar } from './components/Navbar';
-import { AlertBanner } from './components/AlertBanner';
 import { EmergencyHero } from './components/CitizenPortal/EmergencyHero';
 import { AdminDashboard } from './components/AdminPortal/AdminDashboard';
 
@@ -30,7 +29,6 @@ const MainLayout = () => {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <AlertBanner />
       <Navbar />
 
       <main style={{ flex: 1, paddingBottom: portal === 'admin' ? '85px' : '0px' }}>
