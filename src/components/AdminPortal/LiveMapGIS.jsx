@@ -260,13 +260,22 @@ export const LiveMapGIS = ({ onOpenDispatch }) => {
           attribution='&copy; <a href="https://carto.com/">CARTO</a> NDRRS India'
         />
 
-        {/* Optional Disaster Risk Zones Circles */}
+        {/* AI Simulated Weather Risk Zones */}
         {showZones && (
-          <Circle
-            center={[17.3850, 78.4867]}
-            radius={30000}
-            pathOptions={{ fillColor: '#ef4444', color: '#dc2626', weight: 2, fillOpacity: 0.2 }}
-          />
+          <>
+            {/* Red Zone: Heavy Rain (Wayanad, Kerala) */}
+            <Circle center={[11.6087, 76.0847]} radius={60000} pathOptions={{ fillColor: '#ef4444', color: '#dc2626', weight: 2, fillOpacity: 0.25 }} />
+            {/* Red Zone: Heavy Rain (Uttarakhand) */}
+            <Circle center={[30.3165, 78.0322]} radius={45000} pathOptions={{ fillColor: '#ef4444', color: '#dc2626', weight: 2, fillOpacity: 0.25 }} />
+            {/* Orange Zone: Normal Rain (Mumbai Coast) */}
+            <Circle center={[19.0760, 72.8777]} radius={120000} pathOptions={{ fillColor: '#f97316', color: '#ea580c', weight: 2, fillOpacity: 0.2 }} />
+            {/* Orange Zone: Normal Rain (Hyderabad) */}
+            <Circle center={[17.3850, 78.4867]} radius={40000} pathOptions={{ fillColor: '#f97316', color: '#ea580c', weight: 2, fillOpacity: 0.2 }} />
+            {/* Green Zone: Low Rain (Odisha) */}
+            <Circle center={[20.4625, 85.8830]} radius={90000} pathOptions={{ fillColor: '#10b981', color: '#059669', weight: 2, fillOpacity: 0.15 }} />
+            {/* Green Zone: Low Rain (Chennai) */}
+            <Circle center={[13.0827, 80.2707]} radius={50000} pathOptions={{ fillColor: '#10b981', color: '#059669', weight: 2, fillOpacity: 0.15 }} />
+          </>
         )}
 
         {/* Real Victim Markers ONLY - Breathing Light Animations */}
