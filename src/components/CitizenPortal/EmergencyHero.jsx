@@ -28,6 +28,16 @@ export const EmergencyHero = ({ onOpenModal }) => {
                 <p style={{ fontSize: '0.9rem', color: '#cbd5e1', marginTop: '0.2rem' }}>
                   Live GPS: <strong>{userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}</strong> ({userLocation.city}) • Battery: {batteryLevel}% • Government Telemetry Active
                 </p>
+                <p style={{ fontSize: '0.9rem', color: '#6ee7b7', fontWeight: 'bold', marginTop: '0.4rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.4rem' }}>
+                  YOUR RESPONSE HAS BEEN SHARED TO OUR OFFICIAL.
+                </p>
+                {currentSOS?.status === "DISPATCHED" && (
+                  <div style={{ marginTop: '0.8rem', padding: '0.75rem', background: 'rgba(0,0,0,0.4)', borderRadius: '8px', borderLeft: '4px solid #38bdf8' }}>
+                    <div style={{ fontSize: '0.85rem', color: '#38bdf8', fontWeight: 800, marginBottom: '0.2rem' }}>RESCUE TEAM EN ROUTE!</div>
+                    <div style={{ fontSize: '0.9rem', color: '#fff' }}>Team: <strong>{currentSOS.assignedTeam}</strong></div>
+                    <div style={{ fontSize: '0.9rem', color: '#fff' }}>Vehicle: <strong>{currentSOS.dispatchVehicle}</strong></div>
+                  </div>
+                )}
               </div>
             </div>
 

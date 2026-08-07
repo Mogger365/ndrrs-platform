@@ -188,8 +188,14 @@ const initAudio = () => {
             setVictims([]);
             setAdminIncomingAlert(null);
           } else if (data.type === 'TEAM_DISPATCHED') {
-            const { victimId, teamName } = data.payload;
-            setVictims(prev => prev.map(v => v.id === victimId ? { ...v, status: "DISPATCHED", assignedTeam: teamName } : v));
+            const { victimId, teamName, vehicle } = data.payload;
+            
+            // If this dispatch is for THIS exact citizen's phone, update their currentSOS state
+            if (victimId === deviceIdentity.id) {
+              setCurrentSOS(prev => prev ? { ...prev, status: "DISPATCHED", assignedTeam: teamName, dispatchVehicle: vehicle } : prev);
+            }
+
+            setVictims(prev => prev.map(v => v.id === victimId ? { ...v, status: "DISPATCHED", assignedTeam: teamName, dispatchVehicle: vehicle } : v));
           } else if (data.type === 'PLAY_TARGETED_SIREN') {
             // Target Acoustic Siren Feature
             const { targetDeviceId } = data.payload;
@@ -337,14 +343,15 @@ const initAudio = () => {
   };
 
   // Assign Rescue Team to Victim
-  const assignTeamToVictim = (victimId, teamId) => {
+  const assignTeamToVictim = (victimId, teamId, vehicle = "Standard Rescue Vehicle") => {
     const targetTeam = rescueTeams.find(t => t.id === teamId);
     const teamName = targetTeam ? targetTeam.name : teamId;
 
     setVictims(prev => prev.map(v => v.id === victimId ? {
       ...v,
       status: "DISPATCHED",
-      assignedTeam: teamName
+      assignedTeam: teamName,
+      dispatchVehicle: vehicle
     } : v));
     
     setRescueTeams(prev => prev.map(t => t.id === teamId ? {
@@ -353,7 +360,7 @@ const initAudio = () => {
       assignedVictimId: victimId
     } : t));
 
-    broadcastMessage('TEAM_DISPATCHED', { victimId, teamName });
+    broadcastMessage('TEAM_DISPATCHED', { victimId, teamName, vehicle });
   };
 
   // Target Acoustic Siren Beacon

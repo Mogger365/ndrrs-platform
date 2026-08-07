@@ -5,11 +5,12 @@ import { Send, Navigation, X, ShieldAlert, CheckCircle2 } from 'lucide-react';
 export const TeamDispatchModal = ({ victim, onClose }) => {
   const { rescueTeams, assignTeamToVictim } = useEmergency();
   const [selectedTeamId, setSelectedTeamId] = useState(rescueTeams[0]?.id || '');
+  const [selectedVehicle, setSelectedVehicle] = useState('Offroad 4x4 Rescue Truck');
   const [dispatched, setDispatched] = useState(false);
 
   const handleDispatch = (e) => {
     e.preventDefault();
-    assignTeamToVictim(victim.id, selectedTeamId);
+    assignTeamToVictim(victim.id, selectedTeamId, selectedVehicle);
     setDispatched(true);
     setTimeout(() => {
       onClose();
@@ -68,6 +69,31 @@ export const TeamDispatchModal = ({ victim, onClose }) => {
             </div>
 
             <div>
+              <label style={{ fontSize: '0.88rem', color: 'var(--text-primary)', fontWeight: 700, display: 'block', marginBottom: '0.5rem' }}>
+                Select Dispatch Vehicle:
+              </label>
+              <select
+                value={selectedVehicle}
+                onChange={(e) => setSelectedVehicle(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.85rem',
+                  borderRadius: '8px',
+                  background: 'rgba(15, 23, 42, 0.6)',
+                  border: '1px solid var(--bg-card-border)',
+                  color: '#f8fafc',
+                  marginBottom: '1rem',
+                  outline: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="Offroad 4x4 Rescue Truck">Offroad 4x4 Rescue Truck</option>
+                <option value="Inflatable Rescue Boat">Inflatable Rescue Boat</option>
+                <option value="Heavy Duty Disaster Boat">Heavy Duty Disaster Boat</option>
+                <option value="Helicopter / Aerial Lift">Helicopter / Aerial Lift</option>
+                <option value="Ambulance (Standard)">Ambulance (Standard)</option>
+              </select>
+
               <label style={{ fontSize: '0.88rem', color: 'var(--text-primary)', fontWeight: 700, display: 'block', marginBottom: '0.5rem' }}>
                 Select Available NDRF / SDRF / IAF Response Unit:
               </label>
