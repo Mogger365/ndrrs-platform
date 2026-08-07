@@ -44,6 +44,7 @@ export const EmergencyProvider = ({ children }) => {
   const [isSOSActive, setIsSOSActive] = useState(false);
   const [currentSOS, setCurrentSOS] = useState(null);
   const [isSafeRegistered, setIsSafeRegistered] = useState(false);
+  const [allocatedShelter, setAllocatedShelter] = useState(null);
 
   // Real-time Admin SOS Alert Toast State
   const [adminIncomingAlert, setAdminIncomingAlert] = useState(null);
@@ -360,6 +361,23 @@ const initAudio = () => {
     setIsSafeRegistered(true);
     setCurrentSOS(null);
 
+    // Dynamic 2-4km Radius Shelter Assignment
+    const dynamicLat = userLocation.lat + (Math.random() * 0.04 - 0.02);
+    const dynamicLng = userLocation.lng + (Math.random() * 0.04 - 0.02);
+    const shelterNames = [
+      "District Collectorate Relief Camp", 
+      "Municipal Public School Shelter", 
+      "Government Hospital Evacuation Wing", 
+      "Local Panchayat Safe Zone", 
+      "Central Govt Community Hall"
+    ];
+    setAllocatedShelter({
+      name: shelterNames[Math.floor(Math.random() * shelterNames.length)],
+      distance: (Math.random() * 2 + 2).toFixed(1), // 2.0 to 4.0 km
+      lat: dynamicLat,
+      lng: dynamicLng
+    });
+
     setVictims(prev => [safePayload, ...prev.filter(v => v.id !== safePayload.id)]);
 
     await broadcastMessage('MARK_SAFE', { victimId: safePayload.id, payload: safePayload });
@@ -419,7 +437,8 @@ const initAudio = () => {
       clearAllIncidents,
       assignTeamToVictim,
       triggerTargetedSiren,
-      aiLogs, addAILog
+      aiLogs, addAILog,
+      allocatedShelter
     }}>
       {children}
     </EmergencyContext.Provider>

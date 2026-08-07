@@ -6,7 +6,7 @@ import { AlertCircle, ShieldCheck, MapPin, Battery, Signal, Clock, FileText, Che
 export const EmergencyHero = ({ onOpenModal }) => {
   const {
     userLocation, batteryLevel, networkStatus, isSOSActive,
-    isSafeRegistered, triggerSOS, markSafe, currentSOS
+    isSafeRegistered, triggerSOS, markSafe, currentSOS, allocatedShelter
   } = useEmergency();
   const { t } = useLanguage();
 
@@ -110,6 +110,18 @@ export const EmergencyHero = ({ onOpenModal }) => {
           <p style={{ fontSize: '0.9rem', color: '#cbd5e1', marginBottom: '0.5rem' }}>
             The Government has provided emergency shelter, food, and medical supplies near your safe location.
           </p>
+          
+          {allocatedShelter && (
+            <div style={{ background: 'rgba(255,255,255,0.1)', padding: '1rem', borderRadius: '12px', width: '100%', marginBottom: '0.5rem', textAlign: 'left' }}>
+              <div style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: 800, marginBottom: '0.2rem' }}>NEAREST ALLOCATED SHELTER:</div>
+              <div style={{ fontSize: '1.05rem', color: '#fff', fontWeight: 700 }}>{allocatedShelter.name}</div>
+              <div style={{ fontSize: '0.85rem', color: '#cbd5e1', marginTop: '0.3rem' }}>
+                <MapPin size={12} style={{ display: 'inline', marginRight: '4px' }} />
+                Distance: <strong style={{ color: '#38bdf8' }}>{allocatedShelter.distance} km</strong> radius
+              </div>
+            </div>
+          )}
+
           <div style={{ fontSize: '0.95rem', width: '100%', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <button 
               onClick={() => { setShowSafePopup(false); onOpenModal('shelters'); }} 
