@@ -58,21 +58,37 @@ export const EmergencyProvider = ({ children }) => {
   // Keep a reference to the MQTT client
   const mqttClientRef = useRef(null);
 
+// Global AudioContext for iOS Safari Web Audio compliance
+let globalAudioCtx = null;
+
+const initAudio = () => {
+  if (!globalAudioCtx) {
+    try {
+      globalAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch(e) {}
+  }
+  if (globalAudioCtx && globalAudioCtx.state === 'suspended') {
+    globalAudioCtx.resume();
+  }
+};
+
   // Emergency Siren Sound Generator (Audio Synthesizer)
   const playSirenSound = () => {
     try {
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
+      if (!globalAudioCtx) initAudio();
+      if (!globalAudioCtx) return;
+      
+      const osc = globalAudioCtx.createOscillator();
+      const gain = globalAudioCtx.createGain();
       osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.5);
-      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+      osc.frequency.setValueAtTime(880, globalAudioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(440, globalAudioCtx.currentTime + 0.5);
+      gain.gain.setValueAtTime(0.3, globalAudioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, globalAudioCtx.currentTime + 0.5);
       osc.connect(gain);
-      gain.connect(audioCtx.destination);
+      gain.connect(globalAudioCtx.destination);
       osc.start();
-      osc.stop(audioCtx.currentTime + 0.5);
+      osc.stop(globalAudioCtx.currentTime + 0.5);
     } catch(e) {}
   };
 
@@ -232,6 +248,8 @@ export const EmergencyProvider = ({ children }) => {
 
   // INSTANT 100% REAL SOS SIGNAL TRIGGER (Works on Mobile Phone & Laptop)
   const triggerSOS = async (customData = {}) => {
+    initAudio(); // Unlock audio context on iOS Safari immediately on user touch
+    
     const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent);
     
     // Spread them out slightly so multiple phones in the same room don't overlap perfectly on the map
